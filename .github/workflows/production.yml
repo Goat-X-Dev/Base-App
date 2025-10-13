@@ -50,7 +50,6 @@ jobs:
             docker run -d -p 8080:8080 --name base-service userbeta/base:1.0.0 > logs/output.log 2>&1
           EOF
           rm -f private_key.pem
-          # Clean up the pr
 
 #        uses: appleboy/ssh-action@v1.0.0
 #        with:
