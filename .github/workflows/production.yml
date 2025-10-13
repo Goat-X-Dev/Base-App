@@ -1,0 +1,45 @@
+name: production.yml
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  base-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: 21
+          distribution: 'temurin'
+
+      - name: Build Project
+        run: mvn clean package -DskipTests
+
+      - name: Run Test
+        run: mvn test
+
+      - name: Deploy on EC2 instance
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "target/base-0.0.1-SNAPSHOT.jar"
+          home: "/home/${{ secrets.EC2_USERNAME }}/base.jar"
+          script: |
+            pkill -f 'base.jar' || true
+            nohup java -jar /home/${{ secrets.EC2_USERNAME }}/base.jar > /home/${{ secrets.EC2_USERNAME }}/app.log 2>&1 &
+#            lsof -t -i:8080 | xargs -r kill -9
+#            rm -rf /home/ubuntu/Base-App
+#            git clone https://github.com/Goat-X-Dev/Base-App.git
+#            cd Base-App
+#            chmod +x ./mvnw
+#            ./mvnw clean package -DskipTests
+#            ./mvnw spring-boot:run
+#            nohup ./mvnw spring-boot:run > logs/output.log 2>&1 &
