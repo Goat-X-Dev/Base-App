@@ -23,15 +23,19 @@ jobs:
       - name: Run Test
         run: mvn test
 
-      - name: Upload JAR to EC2
-        uses: appleboy/scp-action@v0.1.7
+      - name: Build Docker Image
+        run: |
+          docker build -t base:1.0.0 .
+          docker tag base:1.0.0 userbeta/base:1.0.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          source: "target/base-0.0.1-SNAPSHOT.jar"
-          target: "/home/${{ secrets.EC2_USERNAME }}/"
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Image
+        run: docker push userbeta/base:1.0.0
 
       - name: Deploy on EC2 instance
         uses: appleboy/ssh-action@v1.0.0
@@ -39,22 +43,46 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
           script: |
-            echo "Stopping existing app..."
-            pkill -f 'base.jar' || true
-      
-            echo "Moving new JAR into place..."
-            mv -f /home/${{ secrets.EC2_USERNAME }}/base-0.0.1-SNAPSHOT.jar /home/${{ secrets.EC2_USERNAME }}/base.jar
-      
-            echo "Starting app in background with setsid..."
-            setsid java -jar /home/${{ secrets.EC2_USERNAME }}/base.jar > /home/${{ secrets.EC2_USERNAME }}/app.log 2>&1 < /dev/null &
-      
-            echo "Waiting 2s for process to launch..."
-            sleep 2
-      
-            echo "Checking running processes..."
-            ps aux | grep base.jar
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            docker pull userbeta/base:1.0.0
+            docker stop base-service || true
+            docker rm base-service || true
+            docker run -d -p 8080:8080 --name base-service --rm userbeta/base:1.0.0
+
+
+#      - name: Upload JAR to EC2
+#        uses: appleboy/scp-action@v0.1.7
+#        with:
+#          host: ${{ secrets.EC2_HOST }}
+#          username: ${{ secrets.EC2_USERNAME }}
+#          key: ${{ secrets.EC2_SSH_KEY }}
+#          port: 22
+#          source: "target/base-0.0.1-SNAPSHOT.jar"
+#          target: "/home/${{ secrets.EC2_USERNAME }}/"
+#
+#      - name: Deploy on EC2 instance
+#        uses: appleboy/ssh-action@v1.0.0
+#        with:
+#          host: ${{ secrets.EC2_HOST }}
+#          username: ${{ secrets.EC2_USERNAME }}
+#          key: ${{ secrets.EC2_SSH_KEY }}
+#          port: 22
+#          script: |
+#            echo "Stopping existing app..."
+#            pkill -f 'base.jar' || true
+#
+#            echo "Moving new JAR into place..."
+#            mv -f /home/${{ secrets.EC2_USERNAME }}/base-0.0.1-SNAPSHOT.jar /home/${{ secrets.EC2_USERNAME }}/base.jar
+#
+#            echo "Starting app in background with setsid..."
+#            setsid java -jar /home/${{ secrets.EC2_USERNAME }}/base.jar > /home/${{ secrets.EC2_USERNAME }}/app.log 2>&1 < /dev/null &
+#
+#            echo "Waiting 2s for process to launch..."
+#            sleep 2
+#
+#            echo "Checking running processes..."
+#            ps aux | grep base.jar
 
 
 #            rm -rf /home/ubuntu/Base-App
