@@ -42,9 +42,8 @@ jobs:
           port: 22
           script: |
             pkill -f 'base.jar' || true
-            mv -f /home/${{ secrets.EC2_USERNAME }}/target/base-0.0.1-SNAPSHOT.jar /home/${{ secrets.EC2_USERNAME }}/target/base.jar
-            nohup java -jar /home/${{ secrets.EC2_USERNAME }}/base.jar > /home/${{ secrets.EC2_USERNAME }}/app.log 2>&1 &
-#            lsof -t -i:8080 | xargs -r kill -9
+            mv -f /home/${{ secrets.EC2_USERNAME }}/target/base-0.0.1-SNAPSHOT.jar /home/${{ secrets.EC2_USERNAME }}/base.jar
+            setsid java -jar /home/${{ secrets.EC2_USERNAME }}/base.jar > /home/${{ secrets.EC2_USERNAME }}/app.log 2>&1 < /dev/null &
 #            rm -rf /home/ubuntu/Base-App
 #            git clone https://github.com/Goat-X-Dev/Base-App.git
 #            cd Base-App
