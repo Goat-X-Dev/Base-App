@@ -12,7 +12,7 @@ ARG PROFILE=dev
 ARG APP_VERSION=1.0.0
 
 WORKDIR /app
-COPY --fromm=build /build/target/base-*.jar app.jar
+COPY --from=build /build/target/base-*.jar app.jar
 
 EXPOSE 8080
 
