@@ -38,17 +38,25 @@ jobs:
         run: docker push userbeta/base:1.0.0
 
       - name: Deploy on EC2 instance
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull userbeta/base:1.0.0
-            docker stop base-service || true
-            docker rm base-service || true
-            docker run -d -p 8080:8080 --name base-service --rm userbeta/base:1.0.0
+        run: |
+          ssh -i ${{ secrets.EC2_SSH_KEY }} ubuntu@ec2-13-233-193-52.ap-south-1.compute.amazonaws.com
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker pull userbeta/base:1.0.0
+          docker stop base-service || true
+          docker rm base-service || true
+          docker run -d -p 8080:8080 --name base-service --rm userbeta/base:1.0.0
+
+#        uses: appleboy/ssh-action@v1.0.0
+#        with:
+#          host: ${{ secrets.EC2_HOST }}
+#          username: ${{ secrets.EC2_USERNAME }}
+#          key: ${{ secrets.EC2_SSH_KEY }}
+#          script: |
+#            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+#            docker pull userbeta/base:1.0.0
+#            docker stop base-service || true
+#            docker rm base-service || true
+#            docker run -d -p 8080:8080 --name base-service --rm userbeta/base:1.0.0
 
 
 #      - name: Upload JAR to EC2
