@@ -39,12 +39,13 @@ jobs:
 
       - name: Deploy on EC2 instance
         run: |
-          ssh -i ${{ secrets.EC2_SSH_KEY }} ubuntu@ec2-13-233-193-52.ap-south-1.compute.amazonaws.com
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker pull userbeta/base:1.0.0
-          docker stop base-service || true
-          docker rm base-service || true
-          docker run -d -p 8080:8080 --name base-service --rm userbeta/base:1.0.0
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ubuntu@ec2-13-233-193-52.ap-south-1.compute.amazonaws.com << 'EOF'
+            echo ${{ secrets.DOCKER_PASSWORD }} | sudo docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+            sudo docker pull userbeta/base:1.0.0
+            sudo docker stop base-service || true
+            sudo docker rm base-service || true
+            sudo docker run -d -p 8080:8080 --name base-service userbeta/base:1.0.0
+          EOF
 
 #        uses: appleboy/ssh-action@v1.0.0
 #        with:
