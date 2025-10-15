@@ -10,7 +10,7 @@ public class BaseController {
 
     @GetMapping
     public String getHello() {
-        return "Hello From  ggEC2 Testing app";
+        return "Hello From  ggEC2 Testing";
     }
 
 }
