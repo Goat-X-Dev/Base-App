@@ -1,8 +1,9 @@
-name: uat.yml
+name: qa.yml
 
 on:
-  workflow_dispatch:
-    - release
+  push:
+    branches:
+      - uat
 
 jobs:
   base-service:
