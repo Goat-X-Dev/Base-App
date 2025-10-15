@@ -2,10 +2,10 @@ name: qa.yml
 
 on:
   workflow_dispatch:
-    - release
 
 jobs:
   base-service:
+    if: github.ref == 'refs/heads/release'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
