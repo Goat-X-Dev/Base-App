@@ -10,7 +10,7 @@ public class BaseController {
 
     @GetMapping
     public String getHello() {
-        return "Hello From Main - Prod";
+        return "Hello From Main - Prod Demo";
     }
 
 }
