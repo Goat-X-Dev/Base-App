@@ -10,7 +10,7 @@ public class BaseController {
 
     @GetMapping
     public String getHello() {
-        return "Hello From UAT";
+        return "Hello From UAT - 2";
     }
 
 }
